@@ -124,9 +124,9 @@ def kakao_register(request):
         'refresh_token': str(refresh)
     }, status=status.HTTP_200_OK)
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def kakao_logout(request): #토큰 만료 
+# @api_view(['POST'])
+# @permission_classes([IsAuthenticated])
+# def kakao_logout(request): #토큰 만료 
     
     
 
