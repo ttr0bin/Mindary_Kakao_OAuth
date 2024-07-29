@@ -66,12 +66,14 @@ def extract_kakao_email(kakao_data):
 @permission_classes([AllowAny])
 def kakao_login(request):
     serializer = KakaoLoginRequestSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     data = serializer.validated_data
     
     # 인가 코드로 토큰 발급 -> 닉네임 추출
     kakao_data = exchange_kakao_access_token(data['access_code'])
     email = extract_kakao_email(kakao_data)
+    print(email)
 
     try: # 해당 email을 가진 user가 있는지 확인
         user = User.objects.get(email=email)
@@ -91,13 +93,20 @@ def kakao_login(request):
 @permission_classes([AllowAny])
 def kakao_register(request):
     serializer = KakaoRegisterRequestSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     data = serializer.validated_data
+    print(data)
 
     kakao_data = exchange_kakao_access_token(data['access_code'])
     email = extract_kakao_email(kakao_data)
+    print(email)
+    nickname = data.get('nickname')
 
-		# 이미 존재하는 사용자 예외처리
+    if not nickname:
+        return Response({"error": "Nickname is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+	# 이미 존재하는 사용자 예외처리
     ok = False
     try:
         user = User.objects.get(email=email)
@@ -107,7 +116,7 @@ def kakao_register(request):
         return Response({'detail': '이미 등록 된 사용자입니다.'}, status=400)
 
     # new 사용자 : 인증하고 우리의 토큰 발급
-    user = User.objects.create_user(email=email, nickname=data['nickname'])
+    user = User.objects.create_user(email=email, nickname=nickname)
     
     refresh = RefreshToken.for_user(user)
     return Response({
@@ -115,9 +124,10 @@ def kakao_register(request):
         'refresh_token': str(refresh)
     }, status=status.HTTP_200_OK)
 
-# @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
-# def kakao_logout(request):
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def kakao_logout(request): #토큰 만료 
+    
     
 
 @api_view(['GET'])
