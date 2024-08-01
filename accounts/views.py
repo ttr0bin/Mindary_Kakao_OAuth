@@ -99,7 +99,6 @@ def kakao_register(request):
     kakao_data = exchange_kakao_access_token(data['access_code'])
     email = extract_kakao_email(kakao_data)
     nickname = data.get('nickname')
-    status = 'KAO'
 
     if not nickname:
         return Response({"error": "Nickname is required"}, status=status.HTTP_400_BAD_REQUEST)
