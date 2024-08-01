@@ -125,7 +125,7 @@ def kakao_register(request):
 @permission_classes([IsAuthenticated])
 def kakao_logout(request): #토큰 만료 
     try:
-        refresh_token = request.data.get('refresh')
+        refresh_token = request.data.get('refresh_token')
         token = RefreshToken(refresh_token)
         token.blacklist() # 토큰을 블랙리스트에 추가하여 무효화
         return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
