@@ -124,11 +124,14 @@ def kakao_register(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def kakao_logout(request): #토큰 만료 
-    KAKAO_REST_API_KEY = os.environ.get('KAKAO_REST_API_KEY')
-    LOGOUT_REDIRECT_URI = 'http://localhost:3000/mindary'
-    logout_response = requests.get(f'https://kauth.kakao.com/oauth/logout?client_id=${KAKAO_REST_API_KEY}&logout_redirect_uri=${LOGOUT_REDIRECT_URI}')
-    return Response({'detail': '로그아웃되었습니다.'}, status=status.HTTP_200_OK)
-
+    try:
+        refresh_token = request.data.get('refresh')
+        token = RefreshToken(refresh_token)
+        token.blacklist() # 토큰을 블랙리스트에 추가하여 무효화
+        return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def verify(request):
