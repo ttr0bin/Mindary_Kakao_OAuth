@@ -15,6 +15,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from accounts.models import User
 from accounts.serializers import KakaoLoginRequestSerializer, KakaoRegisterRequestSerializer, UserSerializer
 
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken, TokenBackendError, TokenNotFound
 
 def exchange_kakao_access_token(access_code):
 		# access_code : 프론트가 넘겨준 인가 코드
@@ -122,15 +123,23 @@ def kakao_register(request):
     }, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
-def kakao_logout(request): #토큰 만료 
+@permission_classes([IsAuthenticated])
+def logout(request):
+    refresh_token = request.data.get('refresh_token')
     try:
-        refresh_token = request.data.get('refresh_token')
         token = RefreshToken(refresh_token)
-        token.blacklist() # 토큰을 블랙리스트에 추가하여 무효화
-        return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
+        token.blacklist()
+        return Response({'message': '로그아웃이 성공적으로 처리되었습니다.'}, status=status.HTTP_200_OK)
+    except TokenNotFound:
+        return Response({'error': '리프레시 토큰이 존재하지 않습니다.'}, status=status.HTTP_400_BAD_REQUEST)
+    except InvalidToken:
+        return Response({'error': '유효하지 않은 리프레시 토큰입니다.'}, status=status.HTTP_400_BAD_REQUEST)
+    except TokenBackendError:
+        return Response({'error': '토큰 백엔드 오류가 발생했습니다.'}, status=status.HTTP_400_BAD_REQUEST)
+    except TokenError as e:
+        return Response({'error': f'토큰 오류: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': f'알 수 없는 오류가 발생했습니다: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
     
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
