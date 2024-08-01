@@ -124,11 +124,12 @@ def kakao_register(request):
         'refresh_token': str(refresh)
     }, status=status.HTTP_200_OK)
 
-# @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
-# def kakao_logout(request): #토큰 만료 
-    
-    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def kakao_logout(request): #토큰 만료 
+    KAKAO_REST_API_KEY = os.environ.get('KAKAO_REST_API_KEY')
+    LOGOUT_REDIRECT_URI = 'http://localhost:3000/mindary'
+    logout_response = requests.get(f'https://kauth.kakao.com/oauth/logout?client_id=${KAKAO_REST_API_KEY}&logout_redirect_uri=${LOGOUT_REDIRECT_URI}')
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

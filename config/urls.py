@@ -24,6 +24,6 @@ urlpatterns = [
 
     path('mindary/accounts/kakao/login', kakao_login),
     path('mindary/accounts/kakao/register', kakao_register),
-    #path('mindary/accounts/logout', kakao_logout),
+    path('mindary/accounts/kakao/logout', kakao_logout),
     path('mindary/accounts/kakao/verify', verify),
 ]
