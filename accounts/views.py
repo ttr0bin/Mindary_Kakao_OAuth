@@ -122,7 +122,7 @@ def kakao_register(request):
     }, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def kakao_logout(request): #토큰 만료 
     try:
         refresh_token = request.data.get('refresh_token')
