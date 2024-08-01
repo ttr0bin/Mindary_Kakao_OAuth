@@ -5,22 +5,20 @@ from django.contrib.auth.models import AbstractBaseUser
 class UserManager(BaseUserManager):
 
   # 식별자로 email, 속성으로 nickname 을 가지는 유저 모델 생성
-  def create_user(self, email, nickname, status, password=None):
+  def create_user(self, email, nickname, password=None):
     if not email:
       raise ValueError('must have user email')
     user = self.model( email=email )
     user.nickname = nickname
-    user.status = status
     user.set_password(password)
     user.save()
     return user
 
-  def create_superuser(self, email, nickname, status, password=None):
+  def create_superuser(self, email, nickname, password=None):
     if not email:
       raise ValueError('must have user email')
     user = self.model( email=email )
     user.nickname = nickname
-    user.status = status
     user.is_admin = True
     user.set_password(password)
     user.save()
@@ -31,12 +29,6 @@ class User(AbstractBaseUser):
   nickname = models.CharField(max_length=30, unique=True, null=False)
   is_active = models.BooleanField(default=True)
   is_admin = models.BooleanField(default=False)
-
-  STATUS_CHOICES = [
-        ('KAO', 'Kakao'),
-        ('ORI', 'Original')
-    ]
-  status = models.CharField(max_length=3, choices=STATUS_CHOICES, default='ORI')
 
   objects = UserManager()
 
