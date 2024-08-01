@@ -73,7 +73,6 @@ def kakao_login(request):
     # 인가 코드로 토큰 발급 -> 닉네임 추출
     kakao_data = exchange_kakao_access_token(data['access_code'])
     email = extract_kakao_email(kakao_data)
-    print(email)
 
     try: # 해당 email을 가진 user가 있는지 확인
         user = User.objects.get(email=email)
@@ -96,12 +95,11 @@ def kakao_register(request):
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     data = serializer.validated_data
-    print(data)
 
     kakao_data = exchange_kakao_access_token(data['access_code'])
     email = extract_kakao_email(kakao_data)
-    print(email)
     nickname = data.get('nickname')
+    status = 'KAO'
 
     if not nickname:
         return Response({"error": "Nickname is required"}, status=status.HTTP_400_BAD_REQUEST)
@@ -130,6 +128,7 @@ def kakao_logout(request): #토큰 만료
     KAKAO_REST_API_KEY = os.environ.get('KAKAO_REST_API_KEY')
     LOGOUT_REDIRECT_URI = 'http://localhost:3000/mindary'
     logout_response = requests.get(f'https://kauth.kakao.com/oauth/logout?client_id=${KAKAO_REST_API_KEY}&logout_redirect_uri=${LOGOUT_REDIRECT_URI}')
+    return Response({'detail': '로그아웃되었습니다.'}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
