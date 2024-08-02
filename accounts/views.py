@@ -14,8 +14,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.models import User
 from accounts.serializers import KakaoLoginRequestSerializer, KakaoRegisterRequestSerializer, UserSerializer
-
-from rest_framework_simplejwt.exceptions import TokenError, InvalidToken, TokenBackendError, TokenNotFound
+from django.http import HttpResponse 
 
 def exchange_kakao_access_token(access_code):
 		# access_code : 프론트가 넘겨준 인가 코드
@@ -124,22 +123,11 @@ def kakao_register(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def logout(request):
-    refresh_token = request.data.get('refresh_token')
-    try:
-        token = RefreshToken(refresh_token)
-        token.blacklist()
-        return Response({'message': '로그아웃이 성공적으로 처리되었습니다.'}, status=status.HTTP_200_OK)
-    except TokenNotFound:
-        return Response({'error': '리프레시 토큰이 존재하지 않습니다.'}, status=status.HTTP_400_BAD_REQUEST)
-    except InvalidToken:
-        return Response({'error': '유효하지 않은 리프레시 토큰입니다.'}, status=status.HTTP_400_BAD_REQUEST)
-    except TokenBackendError:
-        return Response({'error': '토큰 백엔드 오류가 발생했습니다.'}, status=status.HTTP_400_BAD_REQUEST)
-    except TokenError as e:
-        return Response({'error': f'토큰 오류: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        return Response({'error': f'알 수 없는 오류가 발생했습니다: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
+def kakao_logout(request): #토큰 만료 
+    KAKAO_REST_API_KEY = os.environ.get('KAKAO_REST_API_KEY')
+    LOGOUT_REDIRECT_URI = 'http://localhost:3000/mindary'
+    logout_response = requests.get(f'https://kauth.kakao.com/oauth/logout?client_id=${KAKAO_REST_API_KEY}&logout_redirect_uri=${LOGOUT_REDIRECT_URI}')
+    return Response({'detail': '로그아웃되었습니다.'}, status=status.HTTP_200_OK)
     
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
